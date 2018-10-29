@@ -1,0 +1,13 @@
+{
+    "require-dev": {
+    },
+    "require": {
+        "mockery/mockery": "*",
+        "phpunit/phpunit": "^7.4"
+    },
+    "autoload" : {
+	"psr-4" : {
+	    "Application\\" : "Application"
+	}
+    }
+}
