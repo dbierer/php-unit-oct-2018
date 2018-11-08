@@ -1,5 +1,4 @@
 <?php
-namespace Application\User;
 class User
 {
     protected $db;

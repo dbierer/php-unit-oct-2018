@@ -1,63 +1,33 @@
 <?php
 
 // require needed classes and/or autoloader
-use Application\User\User;
 
 class UserTest  // extends what class???
 {
 
     // define protected properties (defined in setup())
-	protected $pdo;
-	protected $users;
+
     public function setup()
     {
         // Create our dependencies (test doubles)
 
-        // define test data
-        $this->users = [
-            ['id' => 1, 'email' => 'chartjes@grumpy-learning.com'],
-            ['id' => 2, 'email' => 'info@example.com']
-        ];
+        // Define test double for PDO
 
         // Define test double for PDOStatement
-		$this->stmt = new class ($this->users) extends \PDOStatement 
-		{
-			protected $users;
-			public function __construct($users)
-			{
-				$this->users = $users;
-			}
-			public function execute()
-			{
-				return TRUE;
-			}
-			public function fetchAll()
-			{
-				return $this->users;
-			}
-		};
-        // Define test double for PDO
-		$this->pdo = new class ($this->stmt) extends \PDO 
-		{
-			protected $stmt;
-			public function __construct($stmt)
-			{
-				$this->stmt = $stmt;
-			}
-			public function prepare()
-			{
-				return $this->stmt;
-			}
-		};
 
-		
     }
 
     /**
      * either use proper annotation or use prefix "test"
      */
-    public function testFetchAllReturnsExpectedResults()
+    public function fetchAllReturnsExpectedResults()
     {
+        // define test data
+        $users = [
+            ['id' => 1, 'email' => 'chartjes@grumpy-learning.com'],
+            ['id' => 2, 'email' => 'info@example.com']
+        ];
+
         // Our PDOStatement needs an execute method that returns a boolean
 
         // Our PDOStatement needs a fetchAll method that returns an array
@@ -68,10 +38,9 @@ class UserTest  // extends what class???
          * Create a new User object that takes the test double we created as
          * a constructor argument
          */
-		$user = new User($this->pdo);
+
         // Now define an assertion that the expected response is obtained
-		$this->assertEquals(TRUE, is_array($user->fetchAll()), 'Value is not an array');
-		$this->assertCount(2, $user->fetchAll(), 'Unable to obtain the expected count');
+
     }
 
     /**
