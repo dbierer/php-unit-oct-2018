@@ -5,8 +5,8 @@
          colors="true">
     <testsuites>
         <testsuite name="PHPUnitTraining">
-            <directory>completed/test</directory>
-            <directory>sandbox/test</directory>
+            <directory>./completed/test</directory>
+            <directory>./sandbox/test</directory>
         </testsuite>
     </testsuites>
 </phpunit>

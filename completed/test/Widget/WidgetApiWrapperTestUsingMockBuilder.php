@@ -1,14 +1,11 @@
 <?php
-namespace CompletedTest;
+namespace CompletedTest\Widget;
 
-// NOTE: you will first need to install Mockery
-//       php composer.phar require "mockery/mockery=*"
-
-use Completed\Widget\WidgetApiWrapper;
+use PDOException;
+use Completed\Widget\ {WidgetApi, WidgetStorage, WidgetApiWrapper};
 use PHPUnit\Framework\TestCase;
-use Mockery as m;
 
-class WidgetApiWrapperTest extends TestCase
+class WidgetApiWrapperTestUsingMockBuilder extends TestCase
 {
 
     const API_URL = 'http://localhost:8080';
@@ -31,13 +28,19 @@ class WidgetApiWrapperTest extends TestCase
         ];
         $this->expectedJson = json_encode($this->expectedRow);
 
-        // create test double for WidgetApi
-        $this->api = m::mock('WidgetApi');
-        $this->api->shouldReceive('findByName')->andReturn($this->expectedJson);
+        // create test double for WidgetApi using mockBuilder()
+        $this->api = $this->getMockBuilder(WidgetApi::class)
+                          ->setMethods(['findByName'])
+                          ->getMock();
+        $this->api->expects($this->once())
+                  ->method('findByName')
+                  ->will($this->returnValue($this->expectedJson));
 
         // create test double for WidgetStorage
-        $this->storage = m::mock('WidgetStorage');
-        $this->storage->shouldReceive('save')->andReturn(true);
+        $this->storage = $this->getMockBuilder(WidgetStorage::class)
+                       ->setMethods(['save'])
+                       ->disableOriginalConstructor()
+                       ->getMock();
 
         $this->wrapper = new WidgetApiWrapper(self::API_URL, $this->api, $this->storage);
     }
@@ -58,6 +61,9 @@ class WidgetApiWrapperTest extends TestCase
     //       that is the job of WidgetStorageTest!!!
     public function testCallByName()
     {
+        $this->storage->expects($this->once())
+                      ->method('save')
+                      ->will($this->returnValue(true));
         $response = $this->wrapper->callByName('test');
         $this->assertEquals($this->expectedRow, $response, self::ERROR_EXPECTED_ARRAY);
     }
@@ -67,12 +73,12 @@ class WidgetApiWrapperTest extends TestCase
     public function testCallByNameThrowsException()
     {
         // override test double for WidgetStorage
-        $this->storage = m::mock('WidgetStorage');
-        $this->storage->shouldReceive('save')->andReturn(false);
+        $this->storage->expects($this->once())
+                      ->method('save')
+                      ->will($this->returnValue(false));
         $this->wrapper = new WidgetApiWrapper(self::API_URL, $this->api, $this->storage);
 
         $e = NULL;
-        $this->storage->shouldReceive('save')->andReturn(false);
         try {
             $response = $this->wrapper->callByName('test');
         } catch (PDOException $e) {
@@ -82,4 +88,5 @@ class WidgetApiWrapperTest extends TestCase
         }
         $this->assertInstanceOf(PDOException::class, $e, self::ERROR_EXPECTED_EXCEPTION);
     }
+
 }

@@ -5,6 +5,8 @@ namespace Completed\Widget;
  * Provides wrapper for WidgetApi + WidgetStorage
  */
 
+use PDOException;
+
 class WidgetApiWrapper
 {
     protected $widget_api;

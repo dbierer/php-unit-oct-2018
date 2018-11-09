@@ -1,10 +1,12 @@
 <?php
-namespace CompletedTest;
+namespace CompletedTest\Widget;
+// NOTE: only works in PHP 7 and above
 
-use Completed\Widget\WidgetApiWrapper;
+use Completed\Widget\ {WidgetApi, WidgetStorage, WidgetApiWrapper};
 use PHPUnit\Framework\TestCase;
+use PDOException;
 
-class WidgetApiWrapperTest extends TestCase
+class WidgetApiWrapperTestUsingAnonClass extends TestCase
 {
 
     const API_URL = 'http://localhost:8080';
@@ -27,20 +29,37 @@ class WidgetApiWrapperTest extends TestCase
         ];
         $this->expectedJson = json_encode($this->expectedRow);
 
-        // create test double for WidgetApi using mockBuilder()
-        $this->api = $this->getMockBuilder(WidgetApi::class)
-                          ->setMethods(['findByName'])
-                          ->getMock();
-        $this->api->expects($this->once())
-                  ->method('findByName')
-                  ->will($this->returnValue($this->expectedJson));
+        // create test double for WidgetApi using PHP 7 anonymous class
+        $this->api = new class() extends WidgetApi {
+            protected $fake;
+            public function setFake($fake)
+            {
+                $this->fake = $fake;
+                return $this;
+            }
+            public function findByName($name)
+            {
+                return $this->fake;
+            }
+        };
+        $this->api->setFake($this->expectedJson);
 
-        // create test double for WidgetStorage
-        $this->storage = $this->getMockBuilder(WidgetStorage::class)
-                       ->setMethods(['save'])
-                       ->disableOriginalConstructor()
-                       ->getMock();
-
+        // create test double for WidgetStorage using PHP 7 anonymous class
+        $this->storage = new class() extends WidgetStorage {
+            public function __construct()
+            {
+                // do nothing
+            }
+            public function setSaveReturn($return)
+            {
+                $this->saveReturn = $return;
+            }
+            public function save($data)
+            {
+                return $this->saveReturn;
+            }
+        };
+        $this->storage->setSaveReturn(true);
         $this->wrapper = new WidgetApiWrapper(self::API_URL, $this->api, $this->storage);
     }
 
@@ -60,9 +79,6 @@ class WidgetApiWrapperTest extends TestCase
     //       that is the job of WidgetStorageTest!!!
     public function testCallByName()
     {
-        $this->storage->expects($this->once())
-                      ->method('save')
-                      ->will($this->returnValue(true));
         $response = $this->wrapper->callByName('test');
         $this->assertEquals($this->expectedRow, $response, self::ERROR_EXPECTED_ARRAY);
     }
@@ -71,13 +87,8 @@ class WidgetApiWrapperTest extends TestCase
     //       we are just asserting that if the storage class is unable to save data, an Exception is thrown
     public function testCallByNameThrowsException()
     {
-        // override test double for WidgetStorage
-        $this->storage->expects($this->once())
-                      ->method('save')
-                      ->will($this->returnValue(false));
-        $this->wrapper = new WidgetApiWrapper(self::API_URL, $this->api, $this->storage);
-
         $e = NULL;
+        $this->storage->setSaveReturn(false);
         try {
             $response = $this->wrapper->callByName('test');
         } catch (PDOException $e) {

@@ -1,22 +1,23 @@
 <?php
-namespace CompletedTest;
+namespace SandboxTest;
+
 /**
  * Makes actual call to API
  * NOTE: such a test is expensive in terms of time and resources!!!
  *
  * For this test to work, the API simulator must be running
- */
-
-// To Run API Simulator:
-/*
- * #1: cd /path/to/source/completed/api
- * #2: php -S localhost:8080 index.php
- * #3: from any client: "http://localhost:8080/api/widget/xxx" where "xxx" = the name of the widget
+ * To Run API Simulator:
  *
- * Look in /path/to/source/completed/api/data.txt for widgets
+ * #1: cd /path/to/source/api
+ * #2: php -S localhost:8080 index.php
+ * #3: usage:
+ *     var_dump((new WidgetApi())->findByName('xxx'));
+ *     where "xxx" = the name of the widget
+ *
+ * Look in /path/to/source/api/data.txt for widgets
  */
 
-use Completed\Widget\WidgetApi;
+use Sandbox\Widget\WidgetApi;
 use PHPUnit\Framework\TestCase;
 
 class WidgetApiTest extends TestCase

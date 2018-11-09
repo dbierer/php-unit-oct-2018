@@ -1,5 +1,5 @@
 <?php
-namespace CompletedTest;
+namespace CompletedTest\Roman;
 
 use Completed\Roman\ {Converter,RomanNumeral};
 use PHPUnit\Framework\TestCase;

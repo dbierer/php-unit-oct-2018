@@ -1,5 +1,5 @@
 <?php
-namespace CompletedTest;
+namespace CompletedTest\Widget;
 
 // NOTE: you will first need to install Mockery
 //       php composer.phar require "mockery/mockery=*"

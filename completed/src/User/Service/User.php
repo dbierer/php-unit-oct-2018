@@ -1,7 +1,8 @@
 <?php
-namespace Completed\User;
+namespace Completed\User\Service;
 
 use PDO;
+use Completed\User\Entity\User as UserEntity;
 class User
 {
     protected $db;
@@ -14,6 +15,7 @@ class User
     public function getAll()
     {
         $stmt = $this->db->prepare('SELECT * FROM users');
+        $stmt->setFetchMode (PDO::FETCH_CLASS, UserEntity::class);
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -23,9 +25,9 @@ class User
         $rows = $this->getAll();
         $active = [];
 
-        foreach ($rows as $row) {
-            if ($row['is_active'] == 1) {
-                $active[] = ['id' => $row['id'], 'email' => $row['email']];
+        foreach ($rows as $entity) {
+            if ($entity->isActive == 1) {
+                $active[] = $entity;
             }
         }
 
